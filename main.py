@@ -1,4 +1,4 @@
-import pandas as pd
+ import pandas as pd
 import joblib
 import yaml
 from sklearn.model_selection import train_test_split
@@ -7,48 +7,24 @@ from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import accuracy_score
 
-# 1. Load the dataset
+# שלב 1: טעינת הנתונים
 df = pd.read_csv('parkinsons.csv')
 
-# 2. Select features (2 inputs, 1 output)
-# Based on the paper, Fo and Fhi are strong indicators
+# שלב 2: בחירת משתנים (2 קלט, 1 פלט)
+# בחרנו שני מאפיינים חזקים לפי הספרות המקצועית
 selected_features = ["MDVP:Fo(Hz)", "MDVP:Fhi(Hz)"]
-target_feature = "status"
-
 X = df[selected_features]
-y = df[target_feature]
+y = df['status']
 
-# 4. Split the data (Training and Validation)
+# שלב 4: חלוקה למערך אימון ותיקוף
 X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# 3 & 5. Scale the data & Choose a model
-# We use a Pipeline to bundle MinMaxScaler and SVC together.
-# This ensures that when the test script calls model.predict(), 
-# the scaling is applied automatically to the raw test data.
+# שלב 3 + 5: יצירת מודל הכולל נרמול (Pipeline)
+# ה-Pipeline מבטיח שה-MinMaxScaler יופעל גם על נתוני הטסט הסודיים
 model = Pipeline([
     ('scaler', MinMaxScaler()),
     ('svm', SVC(kernel='linear', C=10.0))
 ])
 
-# Training
+# אימון המודל
 model.fit(X_train, y_train)
-
-# 6. Test the accuracy
-y_pred = model.predict(X_val)
-score = accuracy_score(y_val, y_pred)
-print(f"Validation Accuracy: {score:.4f}")
-
-# 7. Save the model and update config.yaml
-model_filename = 'parkinsons_model.joblib'
-joblib.dump(model, model_filename)
-
-# Note: The test script expects 'path' and 'features' keys
-config_data = {
-    'selected_features': selected_features,
-    'path': model_filename
-}
-
-with open('config.yaml', 'w') as file:
-    yaml.dump(config_data, file, default_flow_style=False)
-
-print("Setup complete. main.py, model, and config are ready.")
