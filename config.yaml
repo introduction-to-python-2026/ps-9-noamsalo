@@ -1,2 +1,7 @@
+features:
+- MDVP:Fo(Hz)
+- MDVP:Fhi(Hz)
 path: parkinsons_model.joblib
-features: ['MDVP:Fo(Hz)', 'MDVP:Fo(Hz)']
+selected_features:
+- MDVP:Fo(Hz)
+- MDVP:Fhi(Hz)
