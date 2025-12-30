@@ -6,24 +6,20 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import SVC
 
-# בדיקה איזה קובץ קיים בתיקייה (למנוע שגיאת FileNotFoundError)
+# 1. טעינת הנתונים (בדיקה איזה שם קובץ קיים ב-GitHub שלך)
 if os.path.exists('parkinsons.csv'):
     file_name = 'parkinsons.csv'
-elif os.path.exists('parkinson.csv'):
-    file_name = 'parkinson.csv'
 else:
-    file_name = 'parkinsons.csv' # ברירת מחדל
+    file_name = 'parkinson.csv'
 
-# 1. טעינה
 df = pd.read_csv(file_name)
 
-# 2. בחירת עמודות (בדיוק 2 לפי הטסט)
-# אם השמות האלו לא קיימים בדיוק ככה, הטסט יכשל
+# 2. בחירת 2 עמודות (חובה לפי הטסט)
 features = ["MDVP:Fo(Hz)", "MDVP:Fhi(Hz)"]
 X = df[features]
 y = df['status']
 
-# 3. יצירת Pipeline (חובה כדי שהנרמול ישמר במודל)
+# 3. יצירת Pipeline (כולל נרמול ומודל)
 model = Pipeline([
     ('scaler', MinMaxScaler()),
     ('svm', SVC(kernel='linear', C=10.0))
@@ -32,17 +28,17 @@ model = Pipeline([
 # 4. אימון
 model.fit(X, y)
 
-# 5. שמירה (בשם שהדוגמה ביקשה)
-model_path = 'parkinsons_model.joblib'
+# 5. שמירה בשם החדש שקבעת
+model_path = 'parkinsons_model-2.joblib'
 joblib.dump(model, model_path)
 
-# 6. יצירת הקונפיג בדיוק לפי הפורמט של הדוגמה
+# 6. עדכון ה-Config עם השם החדש
 config_data = {
     'selected_features': features,
-    'path': model_path
+    'path': model_path  # כאן אנחנו מעדכנים ל-parkinsons_model-2.joblib
 }
 
 with open('config.yaml', 'w') as f:
     yaml.dump(config_data, f, default_flow_style=False)
 
-print("Done! Everything is ready.")
+print(f"Success! Model saved as {model_path} and config updated.")
