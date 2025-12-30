@@ -1,39 +1,39 @@
 import pandas as pd
 import joblib
 import yaml
+from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import SVC
 
 # 1. טעינת הנתונים
 df = pd.read_csv('parkinsons.csv')
 
-# 2. בחירת בדיוק 2 משתנים (לפי דרישת הטסט: assert len(features) == 2)
-# נשתמש בשניים נפוצים:
+# 2. בחירת בדיוק 2 משתנים (חובה לפי דרישת הטסט)
 selected_features = ['MDVP:Fo(Hz)', 'MDVP:Fhi(Hz)']
 X = df[selected_features]
 y = df['status']
 
-# 3. נרמול (Scaling) - קריטי כדי להגיע לדיוק הנדרש
-scaler = MinMaxScaler()
-X_scaled = scaler.fit_transform(X)
-# חשוב להחזיר ל-DataFrame כדי שהמודל "יכיר" את שמות העמודות בטסט
-X_scaled_df = pd.DataFrame(X_scaled, columns=selected_features)
+# 3. יצירת Pipeline שכולל גם נרמול וגם מודל
+# זה מבטיח שהטסט יצליח להריץ את המודל על נתונים גולמיים
+model_pipeline = Pipeline([
+    ('scaler', MinMaxScaler()),
+    ('svm', SVC(kernel='linear', C=10.0))
+])
 
-# 4. אימון מודל (SVM עם פרמטרים חזקים)
-model = SVC(kernel='rbf', C=10.0, gamma='scale')
-model.fit(X_scaled_df, y)
+# 4. אימון ה-Pipeline
+model_pipeline.fit(X, y)
 
-# 5. שמירת המודל
+# 5. שמירת ה-Pipeline כקובץ המודל
 model_filename = 'parkinsons_model.joblib'
-joblib.dump(model, model_filename)
+joblib.dump(model_pipeline, model_filename)
 
 # 6. יצירת קובץ config.yaml בפורמט שהטסט דורש
 config_data = {
-    'path': model_filename,    # הטסט מחפש 'path'
+    'path': model_filename,
     'features': selected_features
 }
 
 with open('config.yaml', 'w') as file:
     yaml.dump(config_data, file, default_flow_style=False)
 
-print("Main.py execution finished. Model and Config are ready for testing.")
+print("Pipeline model and config are ready!")
