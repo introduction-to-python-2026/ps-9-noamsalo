@@ -1,2 +1,2 @@
-path: "my_model_parkinson.joblib"
-features: ['PPE', 'DFA']
+path:"my_model_parkinson.joblib"
+features:['PPE', 'DFA']
