@@ -35,4 +35,4 @@ print(f'Accuracy: {accuracy}')
 
 import joblib
 
-joblib.dump(model, 'my_model_parkinson.joblib')
+joblib.dump(model, 'my_model-2.joblib')
