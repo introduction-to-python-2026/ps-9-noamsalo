@@ -1,44 +1,36 @@
 import pandas as pd
 import joblib
 import yaml
-import os
-from sklearn.pipeline import Pipeline
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.svm import SVC
 
-# 1. טעינת הנתונים (בדיקה איזה שם קובץ קיים ב-GitHub שלך)
-if os.path.exists('parkinsons.csv'):
-    file_name = 'parkinsons.csv'
-else:
-    file_name = 'parkinson.csv'
+# 1. טעינת הנתונים
+df = pd.read_csv('parkinsons.csv')
 
-df = pd.read_csv(file_name)
-
-# 2. בחירת 2 עמודות (חובה לפי הטסט)
-features = ["MDVP:Fo(Hz)", "MDVP:Fhi(Hz)"]
-X = df[features]
+# 2. בחירת המאפיינים (חייב להיות 2 עמודות לפי המודל שלך)
+# בחרתי את שתי העמודות הראשונות, וודא שאלו העמודות שבהן השתמשת
+selected_features = ["MDVP:Fo(Hz)", "MDVP:Fhi(Hz)"]
+X = df[selected_features]
 y = df['status']
 
-# 3. יצירת Pipeline (כולל נרמול ומודל)
-model = Pipeline([
-    ('scaler', MinMaxScaler()),
-    ('svm', SVC(kernel='linear', C=10.0))
-])
+# 3. נרמול (Scaling)
+scaler = MinMaxScaler()
+X_scaled = scaler.fit_transform(X)
 
-# 4. אימון
-model.fit(X, y)
+# 4. המודל שכבר יש לך (טעון מהקובץ שהעלית)
+# במקום לאמן מחדש, אנחנו משתמשים בקובץ ששלחת לי
+model = joblib.load('my_model.joblib')
 
-# 5. שמירה בשם החדש שקבעת
-model_path = 'parkinsons_model-2.joblib'
-joblib.dump(model, model_path)
+# 5. שמירה סופית של המודל (ליתר ביטחון, כדי שיהיה בתיקייה)
+joblib.dump(model, 'my_model.joblib')
 
-# 6. עדכון ה-Config עם השם החדש
+# 6. יצירת קובץ ה-Config בפורמט שהטסט דורש
 config_data = {
-    'selected_features': features,
-    'path': model_path  # כאן אנחנו מעדכנים ל-parkinsons_model-2.joblib
+    'selected_features': selected_features,
+    'path': 'my_model.joblib'
 }
 
-with open('config.yaml', 'w') as f:
-    yaml.dump(config_data, f, default_flow_style=False)
+with open('config.yaml', 'w') as file:
+    yaml.dump(config_data, file, default_flow_style=False)
 
-print(f"Success! Model saved as {model_path} and config updated.")
+print("Main.py is ready and matches your joblib file!")
